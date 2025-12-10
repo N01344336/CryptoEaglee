@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../modules/cryptocurrencies/models/User');
 const { sendOTPEmail } = require('../services/emailService');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { authenticate, authorize } = require('../shared/middlewares/auth');
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();

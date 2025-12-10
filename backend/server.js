@@ -5,7 +5,7 @@ const server = express();
 const cors = require('cors');
 const cryptoRoutes = require('./modules/cryptocurrencies/routes/cryptoRoutes');
 const connectDB = require('./shared/middlewares/connect-db');
-const { authenticate, authorize } = require('./middlewares/auth');
+const { authenticate, authorize } = require('./shared/middlewares/auth');
 
 const PORT = process.env.PORT || 3000;
 const hostname = process.env.Hostname;
