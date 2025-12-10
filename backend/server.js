@@ -1,19 +1,14 @@
 require('dotenv').config();
+const authRoutes = require('./routes/authRoutes');
 const express = require('express');
 const server = express();
 const cors = require('cors');
 const cryptoRoutes = require('./modules/cryptocurrencies/routes/cryptoRoutes');
 const connectDB = require('./shared/middlewares/connect-db');
+const { authenticate, authorize } = require('./middlewares/auth');
 
 const PORT = process.env.PORT || 3000;
 const hostname = process.env.Hostname;
-
-server.use(express.json());
-server.use(express.urlencoded({ extend: true }));
-
-server.use(connectDB);
-server.use('/api/cryptos', cryptoRoutes);
-server.use(cors());
 
 server.get('/', (req, res) => {
     res.json({
@@ -22,6 +17,17 @@ server.get('/', (req, res) => {
         status: 'Running'
     });
 });
+
+server.use(cors({
+    origin: 'http://localhost:5173',
+}));
+
+server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
+
+server.use(connectDB);
+server.use('/api/cryptos', authenticate, cryptoRoutes);
+server.use('/api/auth', authRoutes)
 
 server.use((error, req, res, next) => {
     console.log(error);

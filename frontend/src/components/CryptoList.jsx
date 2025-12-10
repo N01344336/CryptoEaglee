@@ -9,10 +9,24 @@ function CryptoList() {
     const loadCryptos = async () => {
         try {
             const response = await cryptoAPI.getCryptos();
-            setCryptos(response.data.data);
+
+            let cryptosArray = [];
+
+            if (response.data && response.data.data) {
+                if (Array.isArray(response.data.data)) {
+
+                    cryptosArray = response.data.data;
+                } else if (Array.isArray(response.data.data.data)) {
+                    cryptosArray = response.data.data.data;
+                }
+            }
+
+            setCryptos(cryptosArray);
+            console.log(`Loaded ${cryptosArray.length} cryptos`);
+
         } catch (error) {
-            console.error('Error loading cryptos:', error);
-            alert('Failed to load cryptocurrencies');
+            console.error('Error:', error);
+            alert('Failed to load');
         } finally {
             setLoading(false);
         }
