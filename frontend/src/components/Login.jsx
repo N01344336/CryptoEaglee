@@ -89,8 +89,7 @@ function Login() {
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
                 <p>Don't have an account? <Link to="/register">Register</Link></p>
-                <p>Or continue as <Link to="/">guest</Link> (limited access)</p>
-            </div>
+                <p>Or continue as <Link to="/?guest=true">guest</Link> (limited access)</p>            </div>
         </div>
     );
 }

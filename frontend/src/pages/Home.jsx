@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cryptoAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function Home() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isGuest, setIsGuest] = useState(false);
+    const { isAuthenticated } = useAuth();
+    const location = useLocation();
 
     useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        setIsGuest(searchParams.get('guest') === 'true');
+
         loadStats();
-    }, []);
+    }, [location]);
 
     const loadStats = async () => {
         try {
@@ -27,7 +34,7 @@ function Home() {
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <h1>CryptoEagle Tracker</h1>
             <p style={{ fontSize: '18px', color: '#666', marginBottom: '30px' }}>
-                Simple cryptocurrency portfolio tracker
+                {isGuest ? 'Guest Mode - Limited Access' : 'Simple cryptocurrency portfolio tracker'}
             </p>
 
             {stats && (
@@ -40,48 +47,73 @@ function Home() {
                     background: '#f5f5f5',
                     borderRadius: '8px'
                 }}>
-                    <div style={{ padding: '15px', background: 'white', borderRadius: '6px' }}>
-                        <h3 style={{ margin: '0 0 8px 0' }}>Total Cryptos</h3>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>
-                            {stats.totalCryptos || 0}
-                        </div>
-                    </div>
-
-                    <div style={{ padding: '15px', background: 'white', borderRadius: '6px' }}>
-                        <h3 style={{ margin: '0 0 8px 0' }}>Avg Price</h3>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>
-                            ${stats.averagePrice ? stats.averagePrice.toFixed(2) : '0.00'}
-                        </div>
-                    </div>
-
-                    <div style={{ padding: '15px', background: 'white', borderRadius: '6px' }}>
-                        <h3 style={{ margin: '0 0 8px 0' }}>Market Cap</h3>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>
-                            ${stats.totalMarketCap ? (stats.totalMarketCap / 1e9).toFixed(1) + 'B' : '0'}
-                        </div>
-                    </div>
-
-                    <div style={{ padding: '15px', background: 'white', borderRadius: '6px' }}>
-                        <h3 style={{ margin: '0 0 8px 0' }}>Highest Price</h3>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>
-                            ${stats.highestPrice ? stats.highestPrice.toLocaleString() : '0'}
-                        </div>
-                    </div>
                 </div>
             )}
 
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '40px' }}>
-                <Link to="/cryptos">
-                    <button style={{ padding: '12px 24px', fontSize: '16px', cursor: 'pointer' }}>
-                        View Cryptocurrencies
-                    </button>
-                </Link>
-                <Link to="/cryptos/add">
-                    <button style={{ padding: '12px 24px', fontSize: '16px', cursor: 'pointer', background: '#4CAF50', color: 'white', border: 'none' }}>
-                        Add New Crypto
-                    </button>
-                </Link>
+                {isAuthenticated || isGuest ? (
+                    <Link to="/cryptos">
+                        <button style={{
+                            padding: '12px 24px',
+                            fontSize: '16px',
+                            cursor: 'pointer'
+                        }}>
+                            View Cryptocurrencies
+                        </button>
+                    </Link>
+                ) : (
+                    <Link to="/login">
+                        <button style={{
+                            padding: '12px 24px',
+                            fontSize: '16px',
+                            cursor: 'pointer'
+                        }}>
+                            Login to View Cryptos
+                        </button>
+                    </Link>
+                )}
+
+                {isAuthenticated && (
+                    <Link to="/cryptos/add">
+                        <button style={{
+                            padding: '12px 24px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            background: '#4CAF50',
+                            color: 'white',
+                            border: 'none'
+                        }}>
+                            Add New Crypto
+                        </button>
+                    </Link>
+                )}
+
+                {!isAuthenticated && !isGuest && (
+                    <Link to="/register">
+                        <button style={{
+                            padding: '12px 24px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            background: '#2196F3',
+                            color: 'white',
+                            border: 'none'
+                        }}>
+                            Register
+                        </button>
+                    </Link>
+                )}
             </div>
+
+            {isGuest && (
+                <div style={{ marginTop: '30px', padding: '15px', background: '#fff3cd', borderRadius: '5px' }}>
+                    <p style={{ margin: 0, color: '#856404' }}>
+                        You are in guest mode. Some features are limited.
+                        <Link to="/login" style={{ marginLeft: '10px', color: '#2196F3' }}>
+                            Login for full access
+                        </Link>
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

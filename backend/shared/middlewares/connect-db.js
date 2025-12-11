@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
-const DB_URL = process.env.DB_URL;
-
-async function connectDB(req, res, next) {
+async function connectDB() {
     try {
-        await mongoose.connect(DB_URL, { dbName: "CurrenciesCrypto" });
-        console.log("Database Connected");
-        next();
+        await mongoose.connect(process.env.DB_URL, {
+            dbName: process.env.DB_NAME
+        });
+        console.log('✅ MongoDB connected successfully');
+        return mongoose.connection;
     } catch (err) {
-        console.log('Database connection failed');
-        console.log(err);
+        console.error(' MongoDB connection error:', err.message);
+        throw err;
     }
 }
 

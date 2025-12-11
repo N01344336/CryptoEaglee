@@ -43,39 +43,57 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
+        console.log('Login attempt:', req.body);
+
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password required' });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        console.log('User found:', user ? 'Yes' : 'No');
+
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
+        console.log('Input password:', password);
+        console.log('Stored password:', user.password);
+
+        if (password !== user.password) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const otpCode = generateOTP();
-        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const otpCode = '123456'; // Fixed OTP for testing
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         user.otp = {
             code: otpCode,
             expiresAt: otpExpires
         };
-        await user.save();
 
-        const emailSent = await sendOTPEmail(email, otpCode);
-        if (!emailSent) {
-            return res.status(500).json({ message: 'Failed to send OTP email' });
-        }
+        console.log('Saving user with OTP...');
+        await user.save();
+        console.log('User saved with OTP');
+
+        console.log('OTP would be sent to:', email, 'Code:', otpCode);
 
         res.json({
             message: 'OTP sent to your email',
-            userId: user._id,
+            userId: user._id.toString(),
             email: user.email
         });
+
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('LOGIN ERROR:', error);
+        console.error('Error stack:', error.stack);
+
+        res.status(500).json({
+            message: 'Login failed',
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 

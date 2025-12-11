@@ -24,9 +24,7 @@ function App() {
                         <Route path="/" element={<Home />} />
 
                         <Route path="/cryptos" element={
-                            <ProtectedRoute>
-                                <CryptoList />
-                            </ProtectedRoute>
+                            <CryptoList />
                         } />
 
                         <Route path="/cryptos/add" element={
